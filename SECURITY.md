@@ -2,23 +2,24 @@
 
 ## Scope
 
-`scaffold` is a **template repository** — it contains configuration files, GitHub workflows, and meta documents that are copied into new repositories. It is not a runtime package and has no users in the traditional sense.
+`amber` is a **Git/GitHub backup tool**. It reads from forges using a Personal Access Token and writes git mirrors and metadata to local storage. The most sensitive surfaces are token handling, the scopes amber requests, and the integrity of what it writes to disk.
 
-The supported "version" is always the **tip of `main`**. There are no historical branches to back-port fixes to; downstream repositories should re-pull the relevant file(s) from `main` if a vulnerability is discovered in the shipped templates.
+The supported "version" is always the **tip of `main`** plus the latest tagged release. Fixes are not back-ported to older tags; upgrade to the latest release if a vulnerability is discovered.
 
 ## Reporting a Vulnerability
 
 **Please do not file a public GitHub issue for security problems.**
 
-In the context of this template, a "vulnerability" typically means:
+In the context of amber, a "vulnerability" typically means:
 
-- An insecure default in a shipped workflow (e.g. overly broad `permissions`).
-- A misconfigured Action that could leak secrets.
+- Mishandling of the GitHub token (logging, leaking, or persisting it insecurely).
+- Requesting broader token scopes than the backup actually needs.
+- A flaw that lets a malicious repository or API response write outside the backup root or corrupt the manifest.
 - A dependency in `package.json` that introduces a known CVE.
 
 Use one of the following private channels:
 
-1. **GitHub Private Vulnerability Reporting** (preferred): open a private advisory at <https://github.com/TitusKirch/scaffold/security/advisories/new>.
+1. **GitHub Private Vulnerability Reporting** (preferred): open a private advisory at <https://github.com/TitusKirch/amber/security/advisories/new>.
 2. **Email**: [titus.kirch@kirch.dev](mailto:titus.kirch@kirch.dev). PGP available on request.
 
 Please include:

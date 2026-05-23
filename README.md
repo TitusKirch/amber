@@ -1,87 +1,89 @@
 <div align="center">
 
-# 🧰 scaffold
+# 🔶 amber
 
-**The kirchDev baseline — everything a new repo should ship with on day one, nothing more**
+**Back up Git repositories the way they actually live — not just the history, but the issues, PRs, releases and labels that only exist on the forge**
+
+[![Tests](https://img.shields.io/github/actions/workflow/status/TitusKirch/amber/ci.yml?branch=main&style=flat-square&label=tests)](https://github.com/TitusKirch/amber/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/TitusKirch/amber.svg?style=flat-square&color=10b981)](LICENSE)
 
 </div>
 
 ---
 
 ```bash
-gh repo create my-new-repo --template TitusKirch/scaffold
+amber backup --token $GITHUB_TOKEN --out ./backups
 ```
 
-That's it. Click **Use this template** (or use `gh`), edit a handful of placeholders, and the meta layer — lint, format, commit hooks, CI, CodeQL, Dependabot, release-please — is already wired up.
+That's it. Every repository the token can see — bare git mirror plus a diffable JSON export of its issues, pull requests, releases, labels and milestones — preserved on your own disk.
 
-## ✨ What's in the box
+> [!IMPORTANT]
+> amber is early WIP. The MVP scope below is the current target; expect the CLI surface to change before the first tagged release.
 
-- **🟢 Node + pnpm pinned** — `.nvmrc` (Node 24), `.npmrc` (pnpm 11 with sane defaults), `package.json` with `packageManager`.
-- **🧹 Lint & format via oxc** — `.oxlintrc.json`, `.oxfmtrc.json`, single `pnpm check` gate.
-- **🪝 Commit hooks** — Husky + `lint-staged` + `commitlint` enforcing Conventional Commits.
-- **🤖 Dependency PRs** — Dependabot (npm weekly, actions monthly) + `taze.config.js` for interactive upgrades.
-- **🔁 release-please** — full workflow + config + manifest so the new repo can publish from its first commit.
-- **🛡️ GitHub workflows** — `ci.yml` (lint + format check on PR), `codeql.yml` (push/PR + weekly).
-- **📋 Issue / PR templates** — bug report, feature request, question (`.yml` forms) + PR checklist.
-- **📄 Standard meta** — `LICENSE`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`.
+## ✨ Features
 
-The actual project code can be anything — PHP, Go, Rust, Vue, plain shell. `scaffold` only owns the meta layer that sits on top.
+- **💾 Full git mirror** — every repo is captured with `git clone --mirror`, so all branches, tags and refs come along, not just the default branch.
+- **🗂️ Forge metadata, not just code** — issues, pull requests (with comments), labels, milestones and releases are exported as JSON. The stuff that vanishes when an account is suspended or an org is deleted.
+- **🔁 Incremental re-runs** — second and later runs use `updated_at` cursors to fetch only what changed.
+- **📋 Verifiable manifest** — a top-level index records what was backed up, when, and integrity hashes for each artifact.
+- **🤖 GitHub REST + GraphQL** — bulk issue/PR/discussion pulls via GraphQL through octokit; just point it at a PAT and verify the scopes.
+- **🧩 Forge-agnostic layout** — filesystem-first storage kept diffable so a future GitLab/Gitea backend can reuse the same on-disk shape.
+
+## 📦 Stack
+
+- **Node 24 + pnpm 11** — pinned via `.nvmrc`, `engines` and `packageManager`.
+- **GitHub REST + GraphQL** via [octokit](https://github.com/octokit) — GraphQL for bulk issues/PRs/discussions.
+- **Filesystem-first storage** — each repo becomes a directory holding the bare git mirror plus JSON metadata exports.
+- **oxc toolchain** — `oxlint` + `oxfmt`, with husky + commitlint enforcing Conventional Commits.
 
 ## 🚀 Setup
 
-After clicking **Use this template**:
+Requirements: Node **24+**, **pnpm 11**, and `git`.
 
-1. Clone your new repo.
-2. Replace the placeholders listed in [Customising the template](#-customising-the-template).
-3. Reset release-please as described in [Resetting release-please](#-resetting-release-please) (only if you want to start at `v0.0.0`).
-4. `pnpm install` — Husky activates the hooks via the `prepare` script.
-5. Add your project code and ship the first commit:
+```bash
+git clone https://github.com/TitusKirch/amber.git
+cd amber
+pnpm install
+```
 
-   ```bash
-   git commit -m "chore: initial commit from scaffold"
-   ```
+Provide a GitHub Personal Access Token with read access to the repositories you want to preserve, then run a backup into a target directory:
 
-## 🧰 Customising the template
+```bash
+amber backup --token $GITHUB_TOKEN --out ./backups
+```
 
-Every file below references `TitusKirch/scaffold`, the maintainer's name, or the maintainer's email. Search-and-replace these to your repo's identity before the first push.
+## 🗂️ Backup layout
 
-| File                                  | Replace                                                                          |
-| :------------------------------------ | :------------------------------------------------------------------------------- |
-| `package.json`                        | `name`, `description`, `homepage`, `bugs.url`, `repository.url`, `author`        |
-| `README.md`                           | Project title, tagline, hook snippet, every `TitusKirch/scaffold` link           |
-| `LICENSE`                             | Copyright year + holder                                                          |
-| `CODE_OF_CONDUCT.md`                  | Enforcement contact email                                                        |
-| `CONTRIBUTING.md`                     | Every `TitusKirch/scaffold` link, the development setup section                  |
-| `SECURITY.md`                         | Advisory URL, contact email, scope wording                                       |
-| `.github/ISSUE_TEMPLATE/bug_report.yml`, `feature_request.yml`, `question.yml` | Links pointing to `TitusKirch/scaffold` |
-| `.github/pull_request_template.md`    | Example commit message in the title hint                                         |
-| `release-please-config.json`          | `packages["."]["package-name"]`                                                  |
-| `CLAUDE.md`                           | **Delete** and regenerate with `/init` in Claude Code — it's scaffold-specific  |
+Each backup root holds one directory per repository plus a top-level manifest:
 
-> [!TIP]
-> A quick `grep -rn "TitusKirch/scaffold" .` catches every reference in one sweep.
+```text
+backups/
+├── manifest.json              # what was backed up, when, integrity hashes
+└── <owner>/
+    └── <repo>/
+        ├── git/               # bare `--mirror` clone (all refs)
+        └── metadata/
+            ├── issues.json
+            ├── pull-requests.json
+            ├── labels.json
+            ├── milestones.json
+            └── releases.json
+```
 
-## 🔁 Resetting release-please
+The layout is forge-agnostic on purpose — diffable JSON and a bare mirror, nothing tied to GitHub's wire format.
 
-`scaffold` ships with an initial manifest pinned at `0.0.0`. For most cases you can leave it alone — release-please will simply propose a first release PR after your first conventional commit on `main`. If you want a truly clean slate:
+## 🗺️ Roadmap
 
-1. **Manifest** — make sure `.release-please-manifest.json` is `{ ".": "0.0.0" }` (the default).
-2. **Changelog** — delete `CHANGELOG.md` if your fresh repo somehow inherited one.
-3. **Config** — update `release-please-config.json` → `packages["."]["package-name"]` to your repo name.
-4. **Workflow permissions** — in **Settings → Actions → General → Workflow permissions**, enable **Read and write permissions** so release-please can open its PR.
-5. **Tags & releases (optional)** — if you copied the repo with history, drop old tags:
+The MVP focuses on a reliable read-only backup pipeline:
 
-   ```bash
-   git tag -l | xargs -r git tag -d
-   ```
+1. **Auth** — read a PAT from env / config and verify scopes.
+2. **Discover** — list every repo a user/org token can see.
+3. **Mirror code** — `git clone --mirror` each repo.
+4. **Export metadata** — issues, PRs, labels, milestones, releases (wikis + discussions as a stretch).
+5. **Incremental** — change detection via `updated_at` cursors.
+6. **Manifest** — top-level index with integrity hashes.
 
-   …and clear any stale entries on the GitHub **Releases** tab.
-
-6. **First commit** — push a Conventional Commit on `main` (`feat: …`, `fix: …`). release-please opens the initial release PR; merge it and your first tagged release ships.
-
-## 💡 Why "scaffold" and not "template-\*"
-
-Single word, brandable, language-neutral. Future stack-specific templates can sit next to it as `scaffold-laravel`, `scaffold-nuxt`, etc.
+Out of scope for now (but architected to slot in later): restore/import back to a forge, encryption at rest, S3/remote storage backends, and a scheduling daemon. A hosted "set and forget" tier may follow once the self-hostable core is proven.
 
 ## 🤝 Contributing
 
