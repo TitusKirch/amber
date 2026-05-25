@@ -1,32 +1,29 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
-  "name": "scaffold",
+  "name": "amber",
   "version": "0.0.0",
-  "description": "Language-agnostic baseline template for new kirchDev repositories.",
+  "description": "Back up Git repositories and their full forge metadata — issues, PRs, releases, labels — not just the git history.",
   "keywords": [
-    "template",
-    "github-template",
-    "scaffold",
+    "archive",
+    "backup",
+    "cli",
+    "git",
+    "github",
     "kirchdev",
-    "pnpm",
-    "oxlint",
-    "oxfmt",
-    "husky",
-    "commitlint",
-    "conventional-commits",
-    "release-please",
-    "dependabot",
-    "nodejs"
+    "mirror",
+    "nodejs",
+    "octokit",
+    "pnpm"
   ],
-  "homepage": "https://github.com/TitusKirch/scaffold#readme",
+  "homepage": "https://github.com/TitusKirch/amber#readme",
   "bugs": {
-    "url": "https://github.com/TitusKirch/scaffold/issues"
+    "url": "https://github.com/TitusKirch/amber/issues"
   },
   "license": "MIT",
   "author": "Titus Kirch <titus.kirch@kirch.dev>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TitusKirch/scaffold.git"
+    "url": "git+https://github.com/TitusKirch/amber.git"
   },
   "type": "module",
   "scripts": {

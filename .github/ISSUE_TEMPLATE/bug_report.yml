@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Thanks for taking the time to report a bug. Please fill out the form below.
-        For security vulnerabilities, see [SECURITY.md](https://github.com/TitusKirch/scaffold/blob/main/SECURITY.md) instead.
+        For security vulnerabilities, see [SECURITY.md](https://github.com/TitusKirch/amber/blob/main/SECURITY.md) instead.
 
   - type: input
     id: file
