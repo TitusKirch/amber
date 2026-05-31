@@ -1,0 +1,7 @@
+# amber spike — eine Remote pro Zeile.
+# Formate: git@host:owner/repo.git | https://host/owner/repo | ssh://… | owner/repo (Kurzform)
+# Kommentare (#) und Leerzeilen werden ignoriert.
+
+TitusKirch/amber
+TitusKirch/forgemap
+git@github.com:TitusKirch/envprism.git
